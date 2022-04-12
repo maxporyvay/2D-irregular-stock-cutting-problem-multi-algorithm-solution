@@ -2,6 +2,7 @@ import numpy as np
 from pydantic import BaseModel
 import random
 import copy
+from shapely.geometry import Polygon
 
 from prog.fitness import fitness
 from prog.nfp import find_nfp, select_best_nfp_pt
@@ -13,6 +14,7 @@ class Packing:
     def __init__(self, bin_size, polygons, bins=None):
         self.bin_size = bin_size  # bins are all the same size, defined by `bin_size` 
         self.polygons = tuple(polygons.keys())  # polygons we want to fit inside bins (this contains only unique occurences of polygons)
+        self.remaining = polygons
         
         # bins are initially empty except if specified in argument `bins`
         # each bin is a list of tuples, each tuple in a bin contains the following: 
@@ -22,31 +24,22 @@ class Packing:
         else:
             self.bins = [[(x, y, np.array(z)) for x, y, z in abin] for abin in bins]
         
-        # each polygon `pg` will be nested `n` times, `n` being the integer in `quantities` at the same index as `pg` is in polygons
-        # if bins are specified, already nested polygons are excluded from the total `quantities`. This finally gives remaining quantities to nest
-        
         # fitness-fuction weights
         self.coeffs = (1/2, 1/2, 0)
         
-#         self.bin = []
-#         self.invalid = []
-#         self.remaining = {pg: qty - len([True for  x, _, _ in self.bin if x == pg]) 
-#                           for pg, qty in zip(self.polygons, quantities)}
-
-        self.remaining = {pg: qty - len([True for abin in self.bins for  x, _, _ in abin if x == pg]) 
-                          for pg, qty in polygons.items()}
-        
-    def nest_all(self, mode, rand, init, rate):
+    def nest_all(self, mode, sort, algo_extra):
         """Will nest all polygons not yet nested according to remaining quantities"""
         if mode == 'fast greedy':
-            self.make_initial_nesting(1, rand)
+            self.make_initial_nesting(1, sort)
         elif mode == 'full greedy':
-            self.make_initial_nesting(0, rand)
+            self.make_initial_nesting(0, sort)
         elif mode == 'simulated annealing':
-            self.make_initial_nesting(1, rand)
-            self.simulated_annealing(init, rate)
-        elif mode == 'genetic':
-            self.make_initial_nesting(1, rand)
+            self.make_initial_nesting(1, sort)
+            initial_temperature = algo_extra[0]
+            decrease_rate = algo_extra[1]
+            self.simulated_annealing(initial_temperature, decrease_rate)
+        # elif mode == 'genetic':
+        #     self.make_initial_nesting(1, sort)
     
 #     def make_initial_nesting(self, fast=True):
 #         """Will nest all polygons not yet nested according to remaining quantities"""
@@ -54,35 +47,26 @@ class Packing:
 #             for _ in range(self.remaining[polygon]):
 #                 self.initial_polygon_nest(polygon, fast=fast)
                 
-    def make_initial_nesting(self, fast=True, rand=False):
+    def make_initial_nesting(self, fast, sort):
         """Will nest all polygons not yet nested according to remaining quantities"""
-        if rand:
+        if sort == 'random':
             while self.remaining:
                 polygon = random.choice(self.polygons)
-                self.initial_polygon_nest(polygon, rand, fast=fast)
-        else:
-            for polygon in self.polygons:
+                self.initial_polygon_nest(polygon, sort, fast)
+        elif sort == 'decreasing area':
+            polygons = dict(sorted(self.remaining.items(), key=lambda pg: Polygon(pg[0]).area, reverse=True))
+            for polygon in polygons:
                 for _ in range(self.remaining[polygon]):
-                    self.initial_polygon_nest(polygon, rand, fast=fast)
+                    self.initial_polygon_nest(polygon, sort, fast)
                 
-    def initial_polygon_nest(self, polygon, rand, flip=False, rotation=0, fast=False):
+    def initial_polygon_nest(self, polygon, sort, fast):
         """Will nest the input polygon if the initial quantity for this polygon hasn't been reached yet"""
         if not self.remaining.get(polygon):
             return False
         
         # apply transformation
-        if fast:
-            transformed_polygon = apply_transformations(polygon, flip, rotation)
-        else:
+        if not fast:
             transformed_polygons = [apply_transformations(polygon, flip, rotation) for flip in (False, True) for rotation in (0, 90, 180, 270)]
-        # transformed_polygons = [apply_transformations(polygon, flip, rotation) for flip in (True,) for rotation in (0, 90, 180, 270)]
-
-        bin_offset = -1 if fast else 0  # try only last bin if `fast` is True (avoid exponential complexity)
-#         for abin in self.bins[bin_offset:]:    
-#             valid_pts = find_nfp(abin, self.bin_size, transformed_polygon)
-#             if len(valid_pts):
-#                 abin.append((polygon, transformed_polygon, select_best_nfp_pt(valid_pts)))
-#                 break
 
         if not fast:
             flag = []
@@ -124,28 +108,17 @@ class Packing:
                         bestbins = bins
                 self.bins = bestbins
         else:
-            for abin in self.bins[bin_offset:]:    
-                valid_pts = find_nfp(abin, self.bin_size, transformed_polygon)
+            for abin in self.bins[-1:]:    
+                valid_pts = find_nfp(abin, self.bin_size, polygon)
                 if len(valid_pts):
-                    abin.append((polygon, transformed_polygon, select_best_nfp_pt(valid_pts)))
+                    abin.append((polygon, polygon, select_best_nfp_pt(valid_pts)))
                     break
             else:  # if else statement is executed, it means that the polygon did not fit in any existing bins, we need to add a new bin
                 # TODO: check if polygon fits alone in a new bin
-                self.bins.append([(polygon, transformed_polygon, np.zeros(2))])
-#         if self.bin:
-#             valid_pts = find_nfp(self.bin, self.bin_size, transformed_polygon)
-#             if len(valid_pts):
-#                 self.bin.append((polygon, transformed_polygon, select_best_nfp_pt(valid_pts)))
-
-#             else:  # if else statement is executed, it means that the polygon did not fit in any existing bins, we need to add a new bin
-#                 # TODO: check if polygon fits alone in a new bin
-#                 #self.bins.append([(polygon, transformed_polygon, np.zeros(2))])
-#                 self.invalid.append((polygon, transformed_polygon, np.zeros(2)))
-#         else:
-#             self.bin.append((polygon, transformed_polygon, np.zeros(2)))
+                self.bins.append([(polygon, polygon, np.zeros(2))])
 
         self.remaining[polygon] -= 1
-        if rand and (not self.remaining[polygon]):
+        if sort == 'random' and (not self.remaining[polygon]):
             self.remaining.pop(polygon)
         return True
     
