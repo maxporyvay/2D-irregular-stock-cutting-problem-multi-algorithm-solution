@@ -1,0 +1,62 @@
+import numpy as np
+import random
+from prog.transform import apply_transformations
+from prog.nfp import find_nfp, select_best_nfp_pt
+from prog.fitness import fitness
+from shapely.geometry import Polygon
+import copy
+
+def greedy(packing, sort):
+    """Will nest the input polygon if the initial quantity for this polygon hasn't been reached yet"""
+    if sort == 'random':
+        while packing.remaining:
+            polygon = random.choice(list(packing.remaining.keys()))
+            packing = greedy_step(packing, polygon, 1)
+    elif sort == 'decreasing area':
+        polygons = dict(sorted(packing.remaining.items(), key=lambda pg: Polygon(pg[0]).area, reverse=True))
+        for polygon in polygons:
+            for _ in range(packing.remaining[polygon]):
+                packing = greedy_step(packing, polygon, 0)
+
+
+def greedy_step(packing, polygon, random_sort):
+    transformed_polygons = [apply_transformations(polygon, flip, rotation) for flip in (False, True) for rotation in (0, 90, 180, 270)]
+    flag = []
+    bbins = []
+    for abinidx in range(len(packing.bins)):
+        valid_pts_list = []
+        transformed_polygons_ = copy.deepcopy(transformed_polygons)
+        for i in range(len(transformed_polygons)):
+            nfp = find_nfp(packing.bins[abinidx], packing.bin_size, transformed_polygons[i])
+            if len(nfp):
+                valid_pts_list.append(nfp)
+            else:
+                transformed_polygons_[i] = -1
+        if len(valid_pts_list):
+            transformed_polygons_ = [x for x in transformed_polygons_ if x != -1]
+            bins = [copy.deepcopy(packing.bins) for _ in range(len(valid_pts_list))]
+            fit = []
+            for j in range(len(valid_pts_list)):
+                bins[j][abinidx].append((polygon, transformed_polygons_[j], select_best_nfp_pt(valid_pts_list[j])))
+                fit.append(fitness(bins[j], packing.bin_size, packing.coeffs))
+            idx = np.argmax(fit)
+            bbins.append(bins[idx])
+        else:
+            flag.append(1)
+    if len(flag) == len(packing.bins):  # if else statement is executed, it means that the polygon did not fit in any existing bins, we need to add a new bin
+        # TODO: check if polygon fits alone in a new bin
+        packing.bins.append([(polygon, polygon, np.zeros(2))])
+    else:
+        maxi = -1
+        bestbins = []
+        for bins in bbins:
+            fit = fitness(bins, packing.bin_size, packing.coeffs)
+            if fit > maxi:
+                maxi = fit
+                bestbins = bins
+        packing.bins = bestbins
+    
+    packing.remaining[polygon] -= 1
+    if random_sort and (not packing.remaining[polygon]):
+        packing.remaining.pop(polygon)
+    return packing

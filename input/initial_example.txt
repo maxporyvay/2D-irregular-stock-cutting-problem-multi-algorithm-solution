@@ -1,7 +1,7 @@
-decreasing area
+random
 70
 100
-full greedy
+initial
 (
     (0, 0)
     (10, 0)

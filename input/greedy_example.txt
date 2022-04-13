@@ -1,7 +1,7 @@
-random
+decreasing area
 70
 100
-fast greedy
+greedy
 (
     (0, 0)
     (10, 0)
