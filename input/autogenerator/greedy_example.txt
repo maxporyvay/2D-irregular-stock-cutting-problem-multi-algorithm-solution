@@ -1,0 +1,11 @@
+autogenerator dir_greedy_decreasingarea
+decreasing area
+70
+100
+10
+25
+5
+greedy
+equilateral_triangle 10
+rectangle 9 4
+isosceles_trapezium 9 5

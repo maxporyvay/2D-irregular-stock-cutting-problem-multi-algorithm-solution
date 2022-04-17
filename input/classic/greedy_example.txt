@@ -1,9 +1,8 @@
-random
+classic_input
+decreasing area
 70
 100
-simulated annealing
-500
-0.99
+greedy
 (
     (0, 0)
     (10, 0)

@@ -7,8 +7,8 @@ from shapely.geometry import Polygon
 from prog.fitness import fitness
 from prog.nfp import find_nfp, select_best_nfp_pt
 from prog.transform import apply_transformations
-from prog.algos.simulated_annealing import simulated_annealing
-from prog.algos.greedy import greedy
+from prog.algos.simulated_annealing import SA
+from prog.algos.greedy import Greedy
 
 class Packing:
     """Class representing a packing (aka a nesting), that is a list of containers (aka bins) containing polygons with a certain position (aka translation)"""
@@ -34,11 +34,15 @@ class Packing:
         if mode == 'initial':
             self.make_initial_nesting(sort)
         elif mode == 'greedy':
-            self = greedy(self, sort)
+            greedy_algo = Greedy(self, sort)
+            greedy_algo.greedy()
+            self = greedy_algo.packing
         elif mode == 'simulated annealing':
             initial_temperature = algo_extra[0]
             decrease_rate = algo_extra[1]
-            self = simulated_annealing(self, sort, initial_temperature, decrease_rate)
+            SA_algo = SA(self, sort, initial_temperature, decrease_rate)
+            SA_algo.simulated_annealing()
+            self = SA_algo.packing
         # elif mode == 'genetic':
         #     self.make_initial_nesting(sort)
     

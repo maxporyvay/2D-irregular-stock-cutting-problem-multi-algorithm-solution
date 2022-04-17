@@ -1,7 +1,8 @@
-decreasing area
+classic_input
+random
 70
 100
-greedy
+initial
 (
     (0, 0)
     (10, 0)

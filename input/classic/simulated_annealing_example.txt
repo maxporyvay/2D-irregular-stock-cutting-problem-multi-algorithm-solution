@@ -1,7 +1,10 @@
+classic_input
 random
 70
 100
-initial
+simulated annealing
+500
+0.99
 (
     (0, 0)
     (10, 0)
