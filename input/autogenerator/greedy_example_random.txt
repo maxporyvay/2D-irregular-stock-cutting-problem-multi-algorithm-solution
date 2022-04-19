@@ -1,9 +1,10 @@
-autogenerator dir_greedy_decreasingarea
-decreasing area
+autogenerator dir_greedy_random
+yes calc_info
+random
 70
 100
 10
-25
+510
 5
 greedy
 equilateral_triangle 10

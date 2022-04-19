@@ -1,0 +1,14 @@
+autogenerator dir_sa_random_500_1
+yes calc_info
+random
+70
+100
+10
+510
+5
+simulated annealing
+500
+1
+equilateral_triangle 10
+rectangle 9 4
+isosceles_trapezium 9 5

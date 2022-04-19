@@ -1,13 +1,14 @@
-autogenerator dir_sa_random_1000_0.99
-random
+autogenerator dir_sa_descending_500_1
+yes calc_info
+decreasing area
 70
 100
 10
-25
+510
 5
 simulated annealing
-1000
-0.99
+500
+1
 equilateral_triangle 10
 rectangle 9 4
 isosceles_trapezium 9 5
