@@ -1,6 +1,6 @@
 autogenerator dir_greedy_descending
 yes calc_info
-decreasing area
+descending area
 70
 100
 10

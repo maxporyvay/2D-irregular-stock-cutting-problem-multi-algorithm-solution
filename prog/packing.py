@@ -56,7 +56,7 @@ class Packing:
             while self.remaining:
                 polygon = random.choice(list(self.remaining.keys()))
                 self.initial_polygon_nest(polygon, sort)
-        elif sort == 'decreasing area':
+        elif sort == 'descending area':
             polygons = dict(sorted(self.remaining.items(), key=lambda pg: Polygon(pg[0]).area, reverse=True))
             for polygon in polygons:
                 for _ in range(self.remaining[polygon]):

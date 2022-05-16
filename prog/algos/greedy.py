@@ -17,7 +17,7 @@ class Greedy:
             while self.packing.remaining:
                 polygon = random.choice(list(self.packing.remaining.keys()))
                 self.greedy_step(polygon)
-        elif self.sort == 'decreasing area':
+        elif self.sort == 'descending area':
             polygons = dict(sorted(self.packing.remaining.items(), key=lambda pg: Polygon(pg[0]).area, reverse=True))
             for polygon in polygons:
                 for _ in range(self.packing.remaining[polygon]):
