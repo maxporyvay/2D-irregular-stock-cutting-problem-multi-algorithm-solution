@@ -49,13 +49,15 @@ class SA:
     def simulated_annealing(self):
         self.packing.make_initial_nesting(self.sort)
         temperature = self.init_temp
-        energy = fitness(self.packing.bins, self.packing.bin_size, self.packing.coeffs)
+        energy = 1 - fitness(self.packing.bins, self.packing.bin_size, self.packing.coeffs)
         while temperature > 0:
             bins = self.make_a_swap_move()
             if bins != 'error':
-                energy_diff = fitness(bins, self.packing.bin_size, self.packing.coeffs) - energy
-                if energy_diff >= 0 or np.random.random() >= np.exp(energy_diff / temperature):
+                possible_new_energy = 1 - fitness(bins, self.packing.bin_size, self.packing.coeffs)
+                energy_diff = possible_new_energy - energy
+                if energy_diff < 0 or np.random.random() >= np.exp(-energy_diff / temperature):
                     self.packing.bins = bins
+                    energy = possible_new_energy
                     temperature -= self.temp_decr_rate
                 else:
                     temperature -= self.temp_decr_rate * 0.1

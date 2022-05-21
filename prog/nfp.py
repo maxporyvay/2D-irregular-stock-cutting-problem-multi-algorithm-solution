@@ -20,6 +20,15 @@ def select_best_nfp_pt(pts):
     pts = np.array(pts)
     ix = np.argmin(pts[:, 1])
     return pts[ix]
+    
+
+#def select_best_nfp_pt(pts):
+#    """Return one point among all input points `pts`.
+#    Input points `pts` are the valid positions to  fit a new polygon in an existing container with other polygons
+#    It selects the point which minimizes the vertical position (so polygon are stacked at the bottom of the container)
+#    """
+#    pts = np.sort(np.sort(pts, 1), 0)
+#    return pts[0]
 
 
 def find_nfp(abin, bin_size, polygon):
@@ -60,7 +69,8 @@ def find_nfp(abin, bin_size, polygon):
 #         print(nfp_clip_flat)
 #         print('#####################')
         valid_pts.append(get_valid_pts(nfp_flat, nfp_clip_flat))
-    return np.concatenate(valid_pts) if valid_pts else np.array([])  # finally we return all the valid positions to fit the new polygon into the existing container
+    returning_valid_pts = np.concatenate(valid_pts) if valid_pts else np.array([])
+    return returning_valid_pts  # finally we return all the valid positions to fit the new polygon into the existing container
 
 def get_minkowski_sum(pg1: tuple, pg2: tuple, translation):
     """Minkowski sum is an operation between two polygons. 

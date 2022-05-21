@@ -2,11 +2,9 @@ autogenerator dir_greedy_descending
 yes calc_info
 descending area
 70
-100
-10
-510
-5
+65
+1
+6
+1
 greedy
-equilateral_triangle 10
-rectangle 9 4
-isosceles_trapezium 9 5
+rectangle 30 30

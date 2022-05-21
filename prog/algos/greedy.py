@@ -37,14 +37,24 @@ class Greedy:
                 else:
                     transformed_polygons_[i] = -1
             if len(valid_pts_list):
+                #valid_pts_list = np.reshape(np.array(valid_pts_list), -1)
+                #valid_pts_list = valid_pts_list.reshape(valid_pts_list.shape[0] // 2, 2)
+                #valid_pts_list = np.unique(valid_pts_list, axis=0)
                 transformed_polygons_ = [x for x in transformed_polygons_ if x != -1]
                 bins = [copy.deepcopy(self.packing.bins) for _ in range(len(valid_pts_list))]
                 fit = []
                 for j in range(len(valid_pts_list)):
-                    bins[j][abinidx].append((polygon, transformed_polygons_[j], select_best_nfp_pt(valid_pts_list[j])))
-                    fit.append(fitness(bins[j], self.packing.bin_size, self.packing.coeffs))
-                idx = np.argmax(fit)
-                bbins.append(bins[idx])
+                    best_pts = list(valid_pts_list[j])
+                    best_pts.sort(key=lambda x: x[0])
+                    best_pts.sort(key=lambda x: x[1])
+                    best_pt = best_pts[0]
+                    bins[j][abinidx].append((polygon, transformed_polygons_[j], best_pt))
+                    ff = fitness(bins[j], self.packing.bin_size, self.packing.coeffs)
+                    fit.append((ff, best_pt, j))
+                fit.sort(key=lambda x: x[1][0])
+                fit.sort(key=lambda x: x[1][1])
+                fit.sort(key=lambda x: x[0], reverse=True)
+                bbins.append(bins[fit[0][2]])
             else:
                 flag.append(1)
         if len(flag) == len(self.packing.bins):  # if else statement is executed, it means that the polygon did not fit in any existing bins, we need to add a new bin

@@ -1,5 +1,5 @@
 classic_input
-decreasing area
+descending area
 70
 100
 greedy

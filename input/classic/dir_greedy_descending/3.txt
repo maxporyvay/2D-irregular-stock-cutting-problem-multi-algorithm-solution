@@ -1,0 +1,12 @@
+classic_input
+descending area
+70.0
+65.0
+greedy
+(
+    (0, 0)
+    (0, 30.0)
+    (30.0, 30.0)
+    (30.0, 0)
+)
+3
