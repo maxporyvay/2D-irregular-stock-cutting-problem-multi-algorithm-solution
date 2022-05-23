@@ -50,7 +50,11 @@ You should prepare correct input text file. The lines should go one after the ot
   - **)**
   - <ins>number of such figures</ins>: ***int***
 
+Classic input files examples can be found in input/classic directory.
+
 The resulting bins will be written to the specified output file or to standard output. The format of the output is the same as the format of the *bins* field (class *Packing*): list of bins, each bin is a list of its figures, each figure is a tuple with 3 components (constant figure configuration from the input file, transformed figure configuration, translation relative to the origin: numpy.array of two elements (x and y)). Figure configuration is a tuple of tuples-vertices of two elements (coords of each vertice).
+
+Output file example can be found in output directory.
 
 ## Using generator
 
@@ -70,3 +74,5 @@ You should prepare correct input text file. The lines should go one after the ot
   - **equilateral_triangle** and its <ins>side length</ins>: ***float***, divided by a space
   - **rectangle** and its <ins>width</ins>: ***float***, and <ins>length</ins>: ***float***, divided by spaces
   - **isosceles_trapezium** and its <ins>larger base</ins>: ***float***, and <ins>smaller base (equal to height)</ins>: ***float***, divided by spaces
+
+Autogenerator input files examples can be found in input/autogenerator directory.
