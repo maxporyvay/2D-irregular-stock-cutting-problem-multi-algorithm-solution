@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import time
 import argparse
 import math
+from functools import partial
+from multiprocessing import Pool, freeze_support
 
 from prog.packing import Packing
 from prog.visualize import plot_packing
@@ -88,26 +90,60 @@ def autogenerate_files(data):
     return filenames, calculate, path
 
 
+#def make_calculations(filenames, infofilename, path):
+#    timelist = []
+#    fitlist = []
+#    countlist = []
+#    binsusedlist = []
+#    for filename in filenames:
+#        with open(filename) as f:
+#            lines = f.readlines()
+#            _, *data = input_data(lines)
+#            polygons, bin_size, algo, algo_extra, figures_sorting_type = data
+#            countlist.append(sum(list(polygons.values())))
+#            packing = Packing(bin_size, polygons)
+#            time1 = time.time()
+#            packing.nest_all(False, algo, figures_sorting_type, algo_extra)
+#            binsusedlist.append(len(packing.bins))
+#            timelist.append(time.time() - time1)
+#            fit = fitness(packing.bins, packing.bin_size, packing.coeffs)
+#            fitlist.append(fit)
+#    with open(path + '/' + infofilename + '.txt', 'w') as infofile:
+#        print(countlist, file=infofile)
+#        print(binsusedlist, file=infofile)
+#        print(timelist, file=infofile)
+#        print(fitlist, file=infofile)
+        
+        
 def make_calculations(filenames, infofilename, path):
-    timelist = []
-    fitlist = []
-    countlist = []
-    for filename in filenames:
-        with open(filename) as f:
-            lines = f.readlines()
-            _, *data = input_data(lines)
-            polygons, bin_size, algo, algo_extra, figures_sorting_type = data
-            countlist.append(sum(list(polygons.values())))
-            packing = Packing(bin_size, polygons)
-            time1 = time.time()
-            packing.nest_all(algo, figures_sorting_type, algo_extra)
-            timelist.append(time.time() - time1)
-            fit = fitness(packing.bins, packing.bin_size, packing.coeffs)
-            fitlist.append(fit)
+    with Pool(8) as pool:
+        try:
+            results = pool.map(calc, filenames)    
+        except Exception as e:
+            raise e
+    timelist = [res[2] for res in results]
+    fitlist = [res[3] for res in results]
+    countlist = [res[0] for res in results]
+    binsusedlist = [res[1] for res in results]
     with open(path + '/' + infofilename + '.txt', 'w') as infofile:
         print(countlist, file=infofile)
+        print(binsusedlist, file=infofile)
         print(timelist, file=infofile)
         print(fitlist, file=infofile)
+        
+        
+def calc(filename):
+    with open(filename) as f:
+        lines = f.readlines()
+        _, *data = input_data(lines)
+        polygons, bin_size, algo, algo_extra, figures_sorting_type = data
+        packing = Packing(bin_size, polygons)
+        time1 = time.time()
+        packing.nest_all(False, algo, figures_sorting_type, algo_extra)
+        time2 = time.time() - time1
+        fit = fitness(packing.bins, packing.bin_size, packing.coeffs)
+    return sum(list(polygons.values())), len(packing.bins), time2, fit
+        
 
 def main():
     # main speed bottlenecks are visible in this profiling, function `get_minkowski_sum`, `pc.AddPaths` and `get_clipping_limits`
@@ -124,7 +160,8 @@ def main():
         polygons, bin_size, algo, algo_extra, figures_sorting_type = data
         packing = Packing(bin_size, polygons)
         time1 = time.time()
-        packing.nest_all(algo, figures_sorting_type, algo_extra)
+        packing.nest_all(True, algo, figures_sorting_type, algo_extra)
+        print('Bins used:', len(packing.bins))
         print('Time:', time.time() - time1)
         fit = fitness(packing.bins, packing.bin_size, packing.coeffs)
         print('Fitness-function value:', fit)

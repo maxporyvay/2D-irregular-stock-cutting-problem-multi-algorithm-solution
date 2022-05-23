@@ -29,22 +29,23 @@ class Packing:
         # fitness-fuction weights
         self.coeffs = (1/2, 1/2, 0)
         
-    def nest_all(self, mode, sort, algo_extra):
+    def nest_all(self, isnotautogen, algo, sort, algo_extra):
         """Will nest all polygons not yet nested according to remaining quantities"""
-        if mode == 'initial':
+        if algo == 'initial':
             self.make_initial_nesting(sort)
-        elif mode == 'greedy':
+        elif algo == 'greedy':
             greedy_algo = Greedy(self, sort)
             greedy_algo.greedy()
             self = greedy_algo.packing
-        elif mode == 'simulated annealing':
+        elif algo == 'simulated annealing':
             initial_temperature = algo_extra[0]
             decrease_rate = algo_extra[1]
             SA_algo = SA(self, sort, initial_temperature, decrease_rate)
             sum_changes, poss_changes, init_fitness = SA_algo.simulated_annealing()
-            print("Initial fitness:", init_fitness)
-            print("Number of changes:", sum_changes)
-            print("Number of changes after possibility calculation:", poss_changes)
+            if isnotautogen:
+                print("Initial fitness:", init_fitness)
+                print("Number of changes:", sum_changes)
+                print("Number of changes after possibility calculation:", poss_changes)
             self = SA_algo.packing
         # elif mode == 'genetic':
         #     self.make_initial_nesting(sort)
