@@ -1,7 +1,7 @@
 import numpy as np
 import random
 from prog.transform import apply_transformations
-from prog.nfp import find_nfp, select_best_nfp_pt
+from prog.nfp import find_nfp
 from prog.fitness import fitness
 from shapely.geometry import Polygon
 import copy

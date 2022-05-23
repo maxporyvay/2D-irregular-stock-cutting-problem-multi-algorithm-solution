@@ -1,6 +1,6 @@
 import numpy as np
 from prog.transform import apply_transformations
-from prog.nfp import find_nfp, select_best_nfp_pt
+from prog.nfp import find_nfp
 from prog.fitness import fitness
 import copy
 
@@ -18,7 +18,11 @@ class SA:
         transformed_polygon = apply_transformations(polygon[1], flip, rotation)
         valid_pts = find_nfp(abin, self.packing.bin_size, transformed_polygon)
         if len(valid_pts):
-            polygon = (polygon[0], transformed_polygon, select_best_nfp_pt(valid_pts))
+            best_pts = list(valid_pts)
+            best_pts.sort(key=lambda x: x[0])
+            best_pts.sort(key=lambda x: x[1])
+            best_pt = best_pts[0]
+            polygon = (polygon[0], transformed_polygon, best_pt)
             abin.append(polygon)
             return True
         else:
@@ -49,13 +53,19 @@ class SA:
     def simulated_annealing(self):
         self.packing.make_initial_nesting(self.sort)
         temperature = self.init_temp
-        energy = 1 - fitness(self.packing.bins, self.packing.bin_size, self.packing.coeffs)
+        init_fitness = fitness(self.packing.bins, self.packing.bin_size, self.packing.coeffs)
+        energy = 100000 * (1 - fitness(self.packing.bins, self.packing.bin_size, self.packing.coeffs))
+        sum_changes = 0
+        poss_changes = 0
         while temperature > 0:
             bins = self.make_a_swap_move()
             if bins != 'error':
-                possible_new_energy = 1 - fitness(bins, self.packing.bin_size, self.packing.coeffs)
+                possible_new_energy = 100000 * (1 - fitness(bins, self.packing.bin_size, self.packing.coeffs))
                 energy_diff = possible_new_energy - energy
-                if energy_diff < 0 or np.random.random() >= np.exp(-energy_diff / temperature):
+                if energy_diff < 0 or np.random.random() < np.exp(-energy_diff / temperature):
+                    sum_changes += 1
+                    if energy_diff >= 0:
+                        poss_changes += 1
                     self.packing.bins = bins
                     energy = possible_new_energy
                     temperature -= self.temp_decr_rate
@@ -63,3 +73,4 @@ class SA:
                     temperature -= self.temp_decr_rate * 0.1
             else:
                 temperature -= self.temp_decr_rate * 0.1
+        return sum_changes, poss_changes, init_fitness

@@ -20,15 +20,6 @@ def select_best_nfp_pt(pts):
     pts = np.array(pts)
     ix = np.argmin(pts[:, 1])
     return pts[ix]
-    
-
-#def select_best_nfp_pt(pts):
-#    """Return one point among all input points `pts`.
-#    Input points `pts` are the valid positions to  fit a new polygon in an existing container with other polygons
-#    It selects the point which minimizes the vertical position (so polygon are stacked at the bottom of the container)
-#    """
-#    pts = np.sort(np.sort(pts, 1), 0)
-#    return pts[0]
 
 
 def find_nfp(abin, bin_size, polygon):

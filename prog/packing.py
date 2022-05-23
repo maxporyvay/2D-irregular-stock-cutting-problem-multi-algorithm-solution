@@ -5,7 +5,7 @@ import copy
 from shapely.geometry import Polygon
 
 from prog.fitness import fitness
-from prog.nfp import find_nfp, select_best_nfp_pt
+from prog.nfp import find_nfp
 from prog.transform import apply_transformations
 from prog.algos.simulated_annealing import SA
 from prog.algos.greedy import Greedy
@@ -41,7 +41,10 @@ class Packing:
             initial_temperature = algo_extra[0]
             decrease_rate = algo_extra[1]
             SA_algo = SA(self, sort, initial_temperature, decrease_rate)
-            SA_algo.simulated_annealing()
+            sum_changes, poss_changes, init_fitness = SA_algo.simulated_annealing()
+            print("Initial fitness:", init_fitness)
+            print("Number of changes:", sum_changes)
+            print("Number of changes after possibility calculation:", poss_changes)
             self = SA_algo.packing
         # elif mode == 'genetic':
         #     self.make_initial_nesting(sort)
@@ -67,7 +70,11 @@ class Packing:
         for abin in self.bins[-1:]:    
             valid_pts = find_nfp(abin, self.bin_size, polygon)
             if len(valid_pts):
-                abin.append((polygon, polygon, select_best_nfp_pt(valid_pts)))
+                best_pts = list(valid_pts)
+                best_pts.sort(key=lambda x: x[0])
+                best_pts.sort(key=lambda x: x[1])
+                best_pt = best_pts[0]
+                abin.append((polygon, polygon, best_pt))
                 break
         else:  # if else statement is executed, it means that the polygon did not fit in any existing bins, we need to add a new bin
             # TODO: check if polygon fits alone in a new bin
