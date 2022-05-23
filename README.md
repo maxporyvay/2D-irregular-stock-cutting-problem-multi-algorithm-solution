@@ -60,7 +60,7 @@ Output file example can be found in output directory.
 
 You should prepare correct input text file. The lines should go one after the other in the following order:
 
-- **autogenerator** (*const text*), <ins>directory into input/autogenerator/, where the generated files will be put</ins>: ***str***, divided by a space
+- **autogenerator** (*const text*), <ins>directory into input/classic/, where the generated files will be put</ins>: ***str***, divided by a space
 - IF you want the program to <ins>make nesting and calculate the quality and the time required for each of the generated classic input files</ins>, **yes** (*const text*) and the <ins>filename for the file with calculations results</ins>: ***str***, divided by space; ELSE **no** (*const text*)
 - <ins>figures sorting type</ins>: **descending area** OR **random**
 - <ins>sheets length</ins> (*x coord*): ***float***
