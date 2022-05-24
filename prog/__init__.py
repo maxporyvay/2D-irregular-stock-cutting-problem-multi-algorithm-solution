@@ -137,12 +137,13 @@ def calc(filename):
         lines = f.readlines()
         _, *data = input_data(lines)
         polygons, bin_size, algo, algo_extra, figures_sorting_type = data
+        count = sum(list(polygons.values()))
         packing = Packing(bin_size, polygons)
         time1 = time.time()
         packing.nest_all(False, algo, figures_sorting_type, algo_extra)
         time2 = time.time() - time1
         fit = fitness(packing.bins, packing.bin_size, packing.coeffs)
-    return sum(list(polygons.values())), len(packing.bins), time2, fit
+    return count, len(packing.bins), time2, fit
         
 
 def main():
