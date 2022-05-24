@@ -50,13 +50,17 @@ You should prepare correct input text file. The lines should go one after the ot
   - **)**
   - <ins>number of such figures</ins>: ***int***
 
+Classic input files examples can be found in input/classic directory.
+
 The resulting bins will be written to the specified output file or to standard output. The format of the output is the same as the format of the *bins* field (class *Packing*): list of bins, each bin is a list of its figures, each figure is a tuple with 3 components (constant figure configuration from the input file, transformed figure configuration, translation relative to the origin: numpy.array of two elements (x and y)). Figure configuration is a tuple of tuples-vertices of two elements (coords of each vertice).
+
+Output file example can be found in output directory.
 
 ## Using generator
 
 You should prepare correct input text file. The lines should go one after the other in the following order:
 
-- **autogenerator** (*const text*), <ins>directory into input/autogenerator/, where the generated files will be put</ins>: ***str***, divided by a space
+- **autogenerator** (*const text*), <ins>directory into input/classic/, where the generated files will be put</ins>: ***str***, divided by a space
 - IF you want the program to <ins>make nesting and calculate the quality and the time required for each of the generated classic input files</ins>, **yes** (*const text*) and the <ins>filename for the file with calculations results</ins>: ***str***, divided by space; ELSE **no** (*const text*)
 - <ins>figures sorting type</ins>: **descending area** OR **random**
 - <ins>sheets length</ins> (*x coord*): ***float***
@@ -70,3 +74,5 @@ You should prepare correct input text file. The lines should go one after the ot
   - **equilateral_triangle** and its <ins>side length</ins>: ***float***, divided by a space
   - **rectangle** and its <ins>width</ins>: ***float***, and <ins>length</ins>: ***float***, divided by spaces
   - **isosceles_trapezium** and its <ins>larger base</ins>: ***float***, and <ins>smaller base (equal to height)</ins>: ***float***, divided by spaces
+
+Autogenerator input files examples can be found in input/autogenerator directory.
